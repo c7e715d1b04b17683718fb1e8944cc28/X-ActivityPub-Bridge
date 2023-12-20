@@ -1,1 +1,1 @@
-# X ActivityPub Bridge
+# X (Twitter) ActivityPub Bridge
