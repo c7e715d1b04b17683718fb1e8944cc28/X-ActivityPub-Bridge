@@ -115,7 +115,6 @@ export type User = z.infer<typeof UserResponseSchema>['data']['user']['result'];
 
 const AUTHORIZATION = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
 
-// ※レートリミットがあるため、何かしらでキャッシュを取ること
 export default class Twitter {
   private readonly client: KyInstance;
   constructor(authToken?: string) {

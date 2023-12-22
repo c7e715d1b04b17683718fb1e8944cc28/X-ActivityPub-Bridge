@@ -62,7 +62,6 @@ const TimelineProfileSchema = z.object({
 
 export type TimelineProfile = z.infer<typeof TimelineProfileSchema>;
 
-// ※レートリミットがないため、キャッシュを取る必要は無い
 export default class SyndicationTwitter {
   private readonly client: KyInstance;
   constructor(authToken: string = '') {

@@ -5,6 +5,11 @@ import {
 import { LRUCache } from 'npm:lru-cache@10.1.0';
 import Twitter, { type User } from '../internal/web_twitter.ts';
 import SyndicationTwitter from '../internal/syndication_twitter.ts';
+import {
+  expandUrl,
+  expandDescription,
+  textToHtml,
+} from '../utils/formatter.ts';
 
 const app = new Hono();
 
@@ -15,22 +20,6 @@ const usersCache = new LRUCache<string, User>({
 
 const twitter = new Twitter(Deno.env.get('X_AUTH_TOKEN'));
 const syndicationTwitter = new SyndicationTwitter(Deno.env.get('X_AUTH_TOKEN'));
-
-function expandUrl(url: string, urls: { display_url: string, expanded_url: string, url: string, indices: number[] }[]): string {
-  for (const url of urls) {
-    if (url.url === url.display_url) {
-      return url.expanded_url;
-    }
-  }
-  return url;
-}
-
-function expandDescription(description: string, urls: { display_url: string, expanded_url: string, url: string, indices: number[] }[]): string {
-  urls.forEach((url) => {
-    description = description.replace(url.url, url.expanded_url);
-  });
-  return description;
-}
 
 app.get('/:username', async (c: Context) => {
   const username = c.req.param('username');
@@ -50,9 +39,7 @@ app.get('/:username', async (c: Context) => {
       id: `${new URL(c.req.url).origin}/users/${cachedUser.legacy.screen_name}`,
       name: cachedUser.legacy.name,
       preferredUsername: cachedUser.legacy.screen_name,
-      // TODO: URLを展開したのは良いものの、URLとして認識されない。多分HTMLタグを使わなきゃいけない
-      // TODO: メンションが認識されていない
-      summary: expandDescription(cachedUser.legacy.description, cachedUser.legacy.entities.description.urls),
+      summary: textToHtml(expandDescription(cachedUser.legacy.description, cachedUser.legacy.entities.description.urls)),
       icon: {
         type: 'Image',
         url: cachedUser.legacy.profile_image_url_https.replace('_normal', ''),
@@ -84,9 +71,7 @@ app.get('/:username', async (c: Context) => {
     id: `${new URL(c.req.url).origin}/users/${user.legacy.screen_name}`,
     name: user.legacy.name,
     preferredUsername: user.legacy.screen_name,
-    // TODO: URLを展開したのは良いものの、URLとして認識されない。多分HTMLタグを使わなきゃいけない
-    // TODO: メンションが認識されていない
-    summary: expandDescription(user.legacy.description, user.legacy.entities.description.urls),
+    summary: textToHtml(expandDescription(user.legacy.description, user.legacy.entities.description.urls)),
     icon: {
       type: 'Image',
       url: user.legacy.profile_image_url_https.replace('_normal', ''),
@@ -138,14 +123,11 @@ app.get('/:username/outbox', async (c: Context) => {
     return c.json({
       '@context': 'https://www.w3.org/ns/activitystreams',
       type: 'OrderedCollection',
-      id: `${new URL(c.req.url).origin}/users/${username}/outbox`,
+      id: `${new URL(c.req.url).origin}/users/${cachedUser.legacy.screen_name}/outbox`,
       totalItems: cachedUser.legacy.statuses_count,
       // TODO: 何故かノートが表示されない
       orderedItems: userTimeline.timeline.entries.map(({ content: { tweet } }) => ({
         type: 'Note',
-        id: `${new URL(c.req.url).origin}/notes/${tweet.id_str}`,
-        actor: `${new URL(c.req.url).origin}/users/${username}`,
-        name: tweet.full_text,
         content:tweet.full_text,
       })),
     }, 200, { 'content-type': 'application/activity+json' });
@@ -158,15 +140,12 @@ app.get('/:username/outbox', async (c: Context) => {
     type: 'OrderedCollection',
     id: `${new URL(c.req.url).origin}/users/${user.legacy.screen_name}/outbox`,
     totalItems: user.legacy.statuses_count,
-      // TODO: 何故かノートが表示されない
-      orderedItems: userTimeline.timeline.entries.map(({ content: { tweet } }) => ({
+    // TODO: 何故かノートが表示されない
+    orderedItems: userTimeline.timeline.entries.map(({ content: { tweet } }) => ({
       type: 'Note',
-      id: `${new URL(c.req.url).origin}/notes/${tweet.id_str}`,
-      actor: `${new URL(c.req.url).origin}/users/${username}`,
-      name: tweet.full_text,
       content:tweet.full_text,
     })),
-}, 200, { 'content-type': 'application/activity+json' });
+  }, 200, { 'content-type': 'application/activity+json' });
 });
 
 app.get('/:username/followers', async (c: Context) => {
@@ -182,7 +161,7 @@ app.get('/:username/followers', async (c: Context) => {
     return c.json({
       '@context': 'https://www.w3.org/ns/activitystreams',
       type: 'OrderedCollection',
-      id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+      id: `${new URL(c.req.url).origin}/users/${cachedUser.legacy.screen_name}/followers`,
       totalItems: cachedUser.legacy.followers_count,
     }, 200, { 'content-type': 'application/activity+json' });
   }
@@ -192,7 +171,7 @@ app.get('/:username/followers', async (c: Context) => {
   return c.json({
     '@context': 'https://www.w3.org/ns/activitystreams',
     type: 'OrderedCollection',
-    id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+    id: `${new URL(c.req.url).origin}/users/${user.legacy.screen_name}/followers`,
     totalItems: user.legacy.followers_count,
   }, 200, { 'content-type': 'application/activity+json' });
 });
@@ -210,7 +189,7 @@ app.get('/:username/following', async (c: Context) => {
     return c.json({
       '@context': 'https://www.w3.org/ns/activitystreams',
       type: 'OrderedCollection',
-      id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+      id: `${new URL(c.req.url).origin}/users/${cachedUser.legacy.screen_name}/followers`,
       totalItems: cachedUser.legacy.friends_count,
     }, 200, { 'content-type': 'application/activity+json' });
   }
@@ -220,7 +199,7 @@ app.get('/:username/following', async (c: Context) => {
   return c.json({
     '@context': 'https://www.w3.org/ns/activitystreams',
     type: 'OrderedCollection',
-    id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+    id: `${new URL(c.req.url).origin}/users/${user.legacy.screen_name}/followers`,
     totalItems: user.legacy.friends_count,
   }, 200, { 'content-type': 'application/activity+json' });
 });
@@ -238,7 +217,7 @@ app.get('/:username/liked', async (c: Context) => {
     return c.json({
       '@context': 'https://www.w3.org/ns/activitystreams',
       type: 'OrderedCollection',
-      id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+      id: `${new URL(c.req.url).origin}/users/${cachedUser.legacy.screen_name}/followers`,
       totalItems: cachedUser.legacy.favourites_count,
     }, 200, { 'content-type': 'application/activity+json' });
   }
@@ -248,7 +227,7 @@ app.get('/:username/liked', async (c: Context) => {
   return c.json({
     '@context': 'https://www.w3.org/ns/activitystreams',
     type: 'OrderedCollection',
-    id: `${new URL(c.req.url).origin}/users/${username}/followers`,
+    id: `${new URL(c.req.url).origin}/users/${user.legacy.screen_name}/followers`,
     totalItems: user.legacy.favourites_count,
   }, 200, { 'content-type': 'application/activity+json' });
 });
