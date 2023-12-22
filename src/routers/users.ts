@@ -14,6 +14,7 @@ import {
 const app = new Hono();
 
 const usersCache = new LRUCache<string, User>({
+  // TODO: キャッシュの最大サイズや期間が適当なのでよく考える
   max: 1000,
   ttl: 1000 * 60 * 60,
 });
@@ -56,9 +57,27 @@ app.get('/:username', async (c: Context) => {
         value: cachedUser.legacy.entities.url ? textToHtml(xExpandUrl(cachedUser.legacy.url, cachedUser.legacy.entities.url.urls)) : cachedUser.legacy.url,
       });
     }
-    // TODO: 誕生日の表示、空の辞書を弾く方法が不明、Object.keys等ではTypeScriptの型が正しくならない
-    // if (cachedUser.legacy_extended_profile !== {}) {
-    // }
+    if ('birthdate' in cachedUser.legacy_extended_profile) {
+      if (cachedUser.legacy_extended_profile.birthdate.visibility === 'Public' && cachedUser.legacy_extended_profile.birthdate.year_visibility === 'Public') {
+        attachment.push({
+          type: 'PropertyValue',
+          name: 'Birthdate',
+          value: `${cachedUser.legacy_extended_profile.birthdate.year}/${cachedUser.legacy_extended_profile.birthdate.month}/${cachedUser.legacy_extended_profile.birthdate.day}`,
+        });
+      } else if (cachedUser.legacy_extended_profile.birthdate.visibility === 'Public' && cachedUser.legacy_extended_profile.birthdate.year_visibility === 'Self') {
+        attachment.push({
+          type: 'PropertyValue',
+          name: 'Birthdate',
+          value: `${cachedUser.legacy_extended_profile.birthdate.month}/${cachedUser.legacy_extended_profile.birthdate.day}`,
+        });
+      } else if (cachedUser.legacy_extended_profile.birthdate.visibility === 'Self' && cachedUser.legacy_extended_profile.birthdate.year_visibility === 'Public') {
+        attachment.push({
+          type: 'PropertyValue',
+          name: 'Birthdate',
+          value: `${cachedUser.legacy_extended_profile.birthdate.year}`,
+        });
+      }
+    }
     attachment.push({
       type: 'PropertyValue',
       name: 'X ActivityPub Bridge',
@@ -127,9 +146,27 @@ app.get('/:username', async (c: Context) => {
       value: user.legacy.entities.url ? textToHtml(xExpandUrl(user.legacy.url, user.legacy.entities.url.urls)) : user.legacy.url,
     });
   }
-  // TODO: 誕生日の表示、空の辞書を弾く方法が不明、Object.keys等ではTypeScriptの型が正しくならない
-  // if (cachedUser.legacy_extended_profile !== {}) {
-  // }
+  if ('birthdate' in user.legacy_extended_profile) {
+    if (user.legacy_extended_profile.birthdate.visibility === 'Public' && user.legacy_extended_profile.birthdate.year_visibility === 'Public') {
+      attachment.push({
+        type: 'PropertyValue',
+        name: 'Birthdate',
+        value: `${user.legacy_extended_profile.birthdate.year}/${user.legacy_extended_profile.birthdate.month}/${user.legacy_extended_profile.birthdate.day}`,
+      });
+    } else if (user.legacy_extended_profile.birthdate.visibility === 'Public' && user.legacy_extended_profile.birthdate.year_visibility === 'Self') {
+      attachment.push({
+        type: 'PropertyValue',
+        name: 'Birthdate',
+        value: `${user.legacy_extended_profile.birthdate.month}/${user.legacy_extended_profile.birthdate.day}`,
+      });
+    } else if (user.legacy_extended_profile.birthdate.visibility === 'Self' && user.legacy_extended_profile.birthdate.year_visibility === 'Public') {
+      attachment.push({
+        type: 'PropertyValue',
+        name: 'Birthdate',
+        value: `${user.legacy_extended_profile.birthdate.year}`,
+      });
+    }
+  }
   attachment.push({
     type: 'PropertyValue',
     name: 'X ActivityPub Bridge',

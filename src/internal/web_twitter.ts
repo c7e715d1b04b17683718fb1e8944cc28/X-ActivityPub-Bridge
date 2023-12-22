@@ -90,7 +90,7 @@ const UserResponseSchema = z.object({
             // TODO: 更に型を強固にする必要あり
             // visibilityがPublicの場合はdayとmonthが必ず存在
             // year_visibilityがPublicの場合はyearが必ず存在
-            // visibilityステータスはPublic(公開)とSelf(非公開)のみ調べ済み
+            // visibilityステータスはPublic(公開)とSelf(非公開)のみ調べ済み、他にある可能性が高くその場合にはparseErrorが発生するため要注意
             birthdate: z.union([
               z.object({
                 day: z.number(),
@@ -103,11 +103,11 @@ const UserResponseSchema = z.object({
                 day: z.number(),
                 month: z.number(),
                 visibility: z.literal('Public'),
-                year_visibility: z.string(),
+                year_visibility: z.literal('Self'),
               }),
               z.object({
                 year: z.number(),
-                visibility: z.string(),
+                visibility: z.literal('Self'),
                 year_visibility: z.literal('Public'),
               }),
             ]),
