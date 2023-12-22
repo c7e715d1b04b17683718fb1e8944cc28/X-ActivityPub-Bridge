@@ -17,6 +17,7 @@ const UserResponseSchema = z.object({
         is_blue_verified: z.boolean(),
         profile_image_shape: z.string(),
         legacy: z.object({
+          protected: z.boolean().optional(),
           can_dm: z.boolean().optional(),
           can_media_tag: z.boolean().optional(),
           created_at: z.preprocess((value) => new Date(String(value)), z.date()),
@@ -70,9 +71,49 @@ const UserResponseSchema = z.object({
           want_retweets: z.boolean().optional(),
           withheld_in_countries: z.array(z.unknown())
         }),
+        professional: z.object({
+          rest_id: z.string(),
+          professional_type: z.string(),
+          category: z.array(
+            z.object({
+              id: z.number(),
+              name: z.string(),
+              icon_name: z.string(),
+            }),
+          ),
+        }).optional(),
+        has_nft_avatar: z.boolean().optional(),
         smart_blocked_by: z.boolean().optional(),
         smart_blocking: z.boolean().optional(),
-        legacy_extended_profile: z.object({}),
+        legacy_extended_profile: z.union([
+          z.object({
+            // TODO: 更に型を強固にする必要あり
+            // visibilityがPublicの場合はdayとmonthが必ず存在
+            // year_visibilityがPublicの場合はyearが必ず存在
+            // visibilityステータスはPublic(公開)とSelf(非公開)のみ調べ済み
+            birthdate: z.union([
+              z.object({
+                day: z.number(),
+                month: z.number(),
+                year: z.number(),
+                visibility: z.literal('Public'),
+                year_visibility: z.literal('Public'),
+              }),
+              z.object({
+                day: z.number(),
+                month: z.number(),
+                visibility: z.literal('Public'),
+                year_visibility: z.string(),
+              }),
+              z.object({
+                year: z.number(),
+                visibility: z.string(),
+                year_visibility: z.literal('Public'),
+              }),
+            ]),
+          }),
+          z.object({}),
+        ]),
         is_profile_translatable: z.boolean(),
         has_hidden_likes_on_profile: z.boolean(),
         has_hidden_subscriptions_on_profile: z.boolean(),
