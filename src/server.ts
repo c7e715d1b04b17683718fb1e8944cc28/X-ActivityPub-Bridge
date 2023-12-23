@@ -5,6 +5,7 @@ import {
 } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
 
 const app = new Hono();
+
 app.route('/.well-known', await import('./routers/.well-known.ts').then((r) => r.default));
 app.route('/nodeinfo', await import('./routers/nodeinfo.ts').then((r) => r.default));
 app.route('/users', await import('./routers/users.ts').then((r) => r.default));

@@ -1,0 +1,9 @@
+{
+  "name": "x-activitypub-bridge",
+  "version": "1.0.0",
+  "description": "Bridge to allow X (Twitter) users and posts to be viewed externally via the ActivityPub protocol",
+  "scripts": {
+    "dev": "deno run --allow-all ./src/server.ts",
+    "start": "deno run --allow-net --allow-read --allow-env ./src/server.ts"
+  }
+}
