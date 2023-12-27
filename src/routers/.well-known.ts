@@ -17,6 +17,11 @@ app.get('/nodeinfo', (c: Context) => c.json({
   ]
 }));
 
+app.get('/host-meta', (c: Context) => c.text(`<?xml version="1.0" encoding="UTF-8"?>
+<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
+  <Link rel="lrdd" template="${new URL(c.req.url).origin}/.well-known/webfinger?resource={uri}"/>
+</XRD>`, 200, { 'content-type': 'application/rdf+xml' }));
+
 app.get('/webfinger', async (c: Context) => {
   const resource = c.req.query('resource');
   if (!resource) {
