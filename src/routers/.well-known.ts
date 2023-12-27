@@ -1,4 +1,5 @@
 import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { timelineProfilesCache } from '@/lib/cache.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 
 const app = new Hono();
@@ -41,9 +42,13 @@ app.get('/webfinger', async (c: Context) => {
   if (hostname !== new URL(c.req.url).hostname) {
     return c.text('404 Not Found', 404);
   }
-  const result = await syndicationTwitter.timelineProfile(username);
-  if (!result.contextProvider.hasResults) {
-    return c.text('404 Not Found', 404);
+  let timelineProfile = timelineProfilesCache.get(username);
+  if (!timelineProfile) {
+    timelineProfile = await syndicationTwitter.timelineProfile(username);
+    if (!timelineProfile.contextProvider.hasResults) {
+      return c.text('404 Not Found', 404);
+    }
+    timelineProfilesCache.set(username, timelineProfile);
   }
   return c.json({
     subject: `${prefix}:${username}@${hostname}`,

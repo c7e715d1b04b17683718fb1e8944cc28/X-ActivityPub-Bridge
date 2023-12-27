@@ -1,4 +1,4 @@
-import { textToHtml, xExpandDescription } from '@/x/utils.ts';
+import { textToHtml, xExpandShortUrls } from '@/x/utils.ts';
 import type { TimelineProfile, TweetResult } from '@/x/syndication_twitter.ts';
 import { fetchMIMEType } from '@/x/utils.ts';
 
@@ -59,7 +59,7 @@ export async function xTweetResultToActivityPubNote(
       `${reqUrl.origin}/users/${tweetResult.user.screen_name}/followers`,
     ],
     content: textToHtml(
-      xExpandDescription(tweetResult.text, tweetResult.entities.urls),
+      xExpandShortUrls(tweetResult.text, tweetResult.entities.urls),
     ),
     attachment,
   };
@@ -87,7 +87,7 @@ export function xTweetToActivityPubNote(
       `${reqUrl.origin}/users/${tweet.user.screen_name}/followers`,
     ],
     content: textToHtml(
-      xExpandDescription(tweet.text, tweet.entities.urls),
+      xExpandShortUrls(tweet.text, tweet.entities.urls),
     ),
     // attachment,
   };

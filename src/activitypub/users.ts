@@ -1,4 +1,4 @@
-import { textToHtml, xExpandDescription, xExpandUrl } from '@/x/utils.ts';
+import { textToHtml, xExpandShortUrls } from '@/x/utils.ts';
 import type { User } from '@/x/web_twitter.ts';
 
 export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
@@ -21,7 +21,7 @@ export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
     attachment.push({
       type: 'PropertyValue',
       name: 'URL',
-      value: user.legacy.entities.url ? textToHtml(xExpandUrl(user.legacy.url, user.legacy.entities.url.urls)) : user.legacy.url,
+      value: user.legacy.entities.url ? textToHtml(xExpandShortUrls(user.legacy.url, user.legacy.entities.url.urls)) : user.legacy.url,
     });
   }
   if ('birthdate' in user.legacy_extended_profile) {
@@ -88,7 +88,7 @@ export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
     preferredUsername: user.legacy.screen_name,
     name: user.legacy.name,
     // TODO: メンションに対応する
-    summary: textToHtml(xExpandDescription(user.legacy.description, user.legacy.entities.description.urls)),
+    summary: textToHtml(xExpandShortUrls(user.legacy.description, user.legacy.entities.description.urls)),
     url: `https://x.com/intent/user?${new URLSearchParams({
       screen_name: user.legacy.screen_name,
     })}`,

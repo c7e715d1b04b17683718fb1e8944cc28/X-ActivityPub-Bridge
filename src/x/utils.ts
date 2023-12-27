@@ -1,13 +1,17 @@
-export function xExpandUrl(url: string, urls: { display_url: string; expanded_url: string; url: string; indices: number[] }[]): string {
-  return urls.find((u) => u.url === url)?.expanded_url || url;
+interface Url {
+  display_url: string;
+  expanded_url: string;
+  indices: number[];
+  url: string;
 }
 
-export function xExpandDescription(description: string, urls: { display_url: string; expanded_url: string; url: string; indices: number[] }[]): string {
-  // TODO: indicesはどこからどこまでが短縮されたURLかを指す値なので、urlが同じ場合に置き換えるのではなくindicesを使うべき
+export function xExpandShortUrls(text: string, urls: Url[]): string {
+  let result = text;
   urls.forEach((url) => {
-    description = description.replace(url.url, url.expanded_url);
+    const [startIndex, endIndex] = url.indices;
+    result = result.substring(0, startIndex) + url.expanded_url + result.substring(endIndex);
   });
-  return description;
+  return result;
 }
 
 export function textToHtml(text: string): string {
