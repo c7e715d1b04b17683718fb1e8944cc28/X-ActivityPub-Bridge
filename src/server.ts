@@ -1,16 +1,16 @@
 import 'https://deno.land/std@0.209.0/dotenv/load.ts';
-import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
-import { logger } from 'https://deno.land/x/hono@v3.11.7/middleware.ts';
+import { Hono } from 'npm:hono@3.11.11';
+import { logger } from 'npm:hono@3.11.11/logger';
 
 const app = new Hono();
 
 app.use('*', logger());
 
-app.get('/', (c: Context) => c.text('X (Twitter) ActivityPub Bridge'));
+app.get('/', (c) => c.text('X (Twitter) ActivityPub Bridge'));
 
-app.route('/.well-known', await import('@/routers/.well-known.ts').then((r) => r.default));
-app.route('/nodeinfo', await import('@/routers/nodeinfo.ts').then((r) => r.default));
-app.route('/users', await import('@/routers/users.ts').then((r) => r.default));
-app.route('/users/:username/collections', await import('@/routers/users/[username]/collections.ts').then((r) => r.default));
+app.route('', await import('@/routers/.well-known.ts').then((r) => r.default));
+app.route('', await import('@/routers/nodeinfo.ts').then((r) => r.default));
+app.route('', await import('@/routers/users.ts').then((r) => r.default));
+app.route('', await import('@/routers/users/[username]/collections.ts').then((r) => r.default));
 
 Deno.serve(app.fetch);

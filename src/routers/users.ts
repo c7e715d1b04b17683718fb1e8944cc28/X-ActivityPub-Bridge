@@ -1,16 +1,16 @@
-import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { Hono } from 'npm:hono@3.11.11';
 import { timelineProfilesCache, usersCache } from '@/lib/cache.ts';
 import Twitter from '@/x/web_twitter.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 import { xUserToActivityPubPerson } from '@/activitypub/users.ts';
 import { xTweetToActivityPubNote } from '@/activitypub/notes.ts';
 
-const app = new Hono();
+const app = new Hono().basePath('/users');
 
 const twitter = new Twitter(Deno.env.get('X_AUTH_TOKEN'));
 const syndicationTwitter = new SyndicationTwitter(Deno.env.get('X_AUTH_TOKEN'));
 
-app.get('/:username', async (c: Context) => {
+app.get('/:username', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);
@@ -31,7 +31,7 @@ app.get('/:username', async (c: Context) => {
 });
 
 // TODO: inboxを作成してフォロー出来るようにする
-// app.get('/:username/inbox', async (c: Context) => {
+// app.get('/:username/inbox', async (c) => {
 //   const usernameParam = c.req.param('username');
 //   if (!usernameParam) {
 //     return c.text('400 Bad Request', 400);
@@ -42,7 +42,7 @@ app.get('/:username', async (c: Context) => {
 //   }
 // });
 
-app.get('/:username/outbox', async (c: Context) => {
+app.get('/:username/outbox', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);
@@ -82,7 +82,7 @@ app.get('/:username/outbox', async (c: Context) => {
   );
 });
 
-app.get('/:username/followers', async (c: Context) => {
+app.get('/:username/followers', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);
@@ -109,7 +109,7 @@ app.get('/:username/followers', async (c: Context) => {
   );
 });
 
-app.get('/:username/following', async (c: Context) => {
+app.get('/:username/following', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);
@@ -136,7 +136,7 @@ app.get('/:username/following', async (c: Context) => {
   );
 });
 
-app.get('/:username/liked', async (c: Context) => {
+app.get('/:username/liked', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);

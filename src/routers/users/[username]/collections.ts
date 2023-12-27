@@ -1,15 +1,15 @@
-import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { Hono } from 'npm:hono@3.11.11';
 import { usersCache } from '@/lib/cache.ts';
 import Twitter from '@/x/web_twitter.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 import { xTweetResultToActivityPubNote } from '@/activitypub/notes.ts';
 
-const app = new Hono();
+const app = new Hono().basePath('/users/:username/collections');
 
 const twitter = new Twitter(Deno.env.get('X_AUTH_TOKEN'));
 const syndicationTwitter = new SyndicationTwitter(Deno.env.get('X_AUTH_TOKEN'));
 
-app.get('/:collectionId', async (c: Context) => {
+app.get('/:collectionId', async (c) => {
   const usernameParam = c.req.param('username');
   if (!usernameParam) {
     return c.text('400 Bad Request', 400);

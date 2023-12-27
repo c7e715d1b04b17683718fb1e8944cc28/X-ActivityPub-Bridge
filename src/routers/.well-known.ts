@@ -1,12 +1,12 @@
-import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { Hono } from 'npm:hono@3.11.11';
 import { timelineProfilesCache } from '@/lib/cache.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 
-const app = new Hono();
+const app = new Hono().basePath('/.well-known');
 
 const syndicationTwitter = new SyndicationTwitter(Deno.env.get('X_AUTH_TOKEN'));
 
-app.get('/nodeinfo', (c: Context) =>
+app.get('/nodeinfo', (c) =>
   c.json({
     links: [
       {
@@ -16,7 +16,7 @@ app.get('/nodeinfo', (c: Context) =>
     ],
   }));
 
-app.get('/host-meta', (c: Context) =>
+app.get('/host-meta', (c) =>
   c.text(
     `<?xml version="1.0" encoding="UTF-8"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
@@ -26,7 +26,7 @@ app.get('/host-meta', (c: Context) =>
     { 'content-type': 'application/rdf+xml' },
   ));
 
-app.get('/webfinger', async (c: Context) => {
+app.get('/webfinger', async (c) => {
   const resource = c.req.query('resource');
   if (!resource) {
     return c.text('400 Bad Request', 400);

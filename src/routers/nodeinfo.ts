@@ -1,8 +1,8 @@
-import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { Hono } from 'npm:hono@3.11.11';
 
-const app = new Hono();
+const app = new Hono().basePath('/nodeinfo');
 
-app.get('/2.1', (c: Context) =>
+app.get('/2.1', (c) =>
   c.json({
     version: '2.1',
     software: {
