@@ -113,8 +113,8 @@ const UserResponseSchema = z.object({
             ]),
           }),
           z.object({}),
-        ]),
-        is_profile_translatable: z.boolean(),
+        ]).optional(),
+        is_profile_translatable: z.boolean().optional(),
         has_hidden_likes_on_profile: z.boolean(),
         has_hidden_subscriptions_on_profile: z.boolean(),
         verification_info: z.union([
@@ -137,7 +137,7 @@ const UserResponseSchema = z.object({
           z.object({
             is_identity_verified: z.literal(false),
           }),
-        ]),
+        ]).optional(),
         highlights_info: z.object({
           can_highlight_tweets: z.boolean(),
           highlighted_tweets: z.string(),
@@ -219,6 +219,31 @@ export default class Twitter {
     const response = await this.client.get('graphql/NimuplG1OB7Fd2btCLdBOw/UserByScreenName', {
       searchParams: new URLSearchParams({
         variables: JSON.stringify({ screen_name: screenName, withSafetyModeUserFields: true }),
+        features: JSON.stringify({
+          hidden_profile_likes_enabled: true,
+          hidden_profile_subscriptions_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          subscriptions_verification_info_is_identity_verified_enabled: true,
+          subscriptions_verification_info_verified_since_enabled: true,
+          highlights_tweets_tab_ui_enabled: true,
+          responsive_web_twitter_article_notes_tab_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+        }),
+        fieldToggles: JSON.stringify({ withAuxiliaryUserLabels: false }),
+      }),
+    });
+    const user = await response.json()
+      .then((json) => UserResponseSchema.parseAsync(json))
+      .then(({ data: { user: { result } } }) => result);
+    return user;
+  }
+  async getUserByUserId(userId: bigint) {
+    const response = await this.client.get('graphql/CO4_gU4G_MRREoqfiTh6Hg/UserByRestId', {
+      searchParams: new URLSearchParams({
+        variables: JSON.stringify({ userId: userId.toString(), withSafetyModeUserFields: true }),
         features: JSON.stringify({
           hidden_profile_likes_enabled: true,
           hidden_profile_subscriptions_enabled: true,

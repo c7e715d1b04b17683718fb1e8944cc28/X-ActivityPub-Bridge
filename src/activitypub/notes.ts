@@ -1,4 +1,4 @@
-import { textToHtml, xExpandShortUrls } from '@/x/utils.ts';
+import { textToHtml, xExpandShortUrls, xRemoveShortUrls } from '@/x/utils.ts';
 import type { TimelineProfile, TweetResult } from '@/x/syndication_twitter.ts';
 import { fetchMIMEType } from '@/x/utils.ts';
 
@@ -21,10 +21,11 @@ export async function xTweetResultToActivityPubNote(
         case 'video': {
           const variant = mediaDetail.video_info.variants.at(-1);
           if (variant) {
+            const variantUrl = new URL(variant.url);
             return {
               type: 'Document',
               mediaType: variant.content_type,
-              url: variant.url,
+              url: `${variantUrl.origin}${variantUrl.pathname}`,
               width: mediaDetail.original_info.width,
               height: mediaDetail.original_info.height,
             };
@@ -44,22 +45,28 @@ export async function xTweetResultToActivityPubNote(
   return {
     '@context': [
       'https://www.w3.org/ns/activitystreams',
+      {
+        sensitive: 'as:sensitive',
+      },
     ],
-    id: `${reqUrl.origin}/users/${tweetResult.user.screen_name}/collections/${tweetResult.id_str}`,
+    id: `${reqUrl.origin}/users/${tweetResult.user.id_str}/statuses/${tweetResult.id_str}`,
     type: 'Note',
     summary: undefined,
-    inReplyTo: tweetResult.in_reply_to_status_id_str ? `${reqUrl.origin}/collections/${tweetResult.in_reply_to_status_id_str}` : undefined,
+    inReplyTo: tweetResult.in_reply_to_status_id_str ? `${reqUrl.origin}/statuses/${tweetResult.in_reply_to_status_id_str}` : undefined,
     published: tweetResult.created_at.toISOString(),
     url: `https://x.com/${tweetResult.user.screen_name}/status/${tweetResult.id_str}`,
-    attributedTo: `${reqUrl.origin}/users/${tweetResult.user.screen_name}`,
+    attributedTo: `${reqUrl.origin}/users/${tweetResult.user.id_str}`,
     to: [
       'https://www.w3.org/ns/activitystreams#Public',
     ],
     cc: [
-      `${reqUrl.origin}/users/${tweetResult.user.screen_name}/followers`,
+      `${reqUrl.origin}/users/${tweetResult.user.id_str}/followers`,
     ],
+    sensitive: tweetResult.possibly_sensitive,
     content: textToHtml(
-      xExpandShortUrls(tweetResult.text, tweetResult.entities.urls),
+      tweetResult.entities.media
+        ? xRemoveShortUrls(xExpandShortUrls(tweetResult.text, tweetResult.entities.urls), tweetResult.entities.media)
+        : xExpandShortUrls(tweetResult.text, tweetResult.entities.urls),
     ),
     attachment,
   };
@@ -72,22 +79,28 @@ export function xTweetToActivityPubNote(
   return {
     '@context': [
       'https://www.w3.org/ns/activitystreams',
+      {
+        sensitive: 'as:sensitive',
+      },
     ],
-    id: `${reqUrl.origin}/users/${tweet.user.screen_name}/collections/${tweet.id_str}`,
+    id: `${reqUrl.origin}/users/${tweet.user.id_str}/statuses/${tweet.id_str}`,
     type: 'Note',
     summary: undefined,
-    // inReplyTo: tweet.in_reply_to_status_id_str ? `${reqUrl.origin}/collections/${tweet.in_reply_to_status_id_str}` : undefined,
+    // inReplyTo: tweet.in_reply_to_status_id_str ? `${reqUrl.origin}/statuses/${tweet.in_reply_to_status_id_str}` : undefined,
     published: tweet.created_at.toISOString(),
     url: `https://x.com/${tweet.user.screen_name}/status/${tweet.id_str}`,
-    attributedTo: `${reqUrl.origin}/users/${tweet.user.screen_name}`,
+    attributedTo: `${reqUrl.origin}/users/${tweet.user.id_str}`,
     to: [
       'https://www.w3.org/ns/activitystreams#Public',
     ],
     cc: [
-      `${reqUrl.origin}/users/${tweet.user.screen_name}/followers`,
+      `${reqUrl.origin}/users/${tweet.user.id_str}/followers`,
     ],
+    sensitive: tweet.possibly_sensitive,
     content: textToHtml(
-      xExpandShortUrls(tweet.text, tweet.entities.urls),
+      tweet.entities.media
+        ? xRemoveShortUrls(xExpandShortUrls(tweet.text, tweet.entities.urls), tweet.entities.media)
+        : xExpandShortUrls(tweet.text, tweet.entities.urls),
     ),
     // attachment,
   };

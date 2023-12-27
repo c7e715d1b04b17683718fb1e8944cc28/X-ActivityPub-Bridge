@@ -12,5 +12,6 @@ app.route('', await import('@/routers/.well-known.ts').then((r) => r.default));
 app.route('', await import('@/routers/nodeinfo.ts').then((r) => r.default));
 app.route('', await import('@/routers/users.ts').then((r) => r.default));
 app.route('', await import('@/routers/users/[username]/collections.ts').then((r) => r.default));
+app.route('', await import('@/routers/users/[username]/statuses.ts').then((r) => r.default));
 
 Deno.serve(app.fetch);

@@ -7,7 +7,7 @@ app.get('/2.1', (c) =>
     version: '2.1',
     software: {
       name: 'x-activitypub-bridge',
-      version: '1.0.0',
+      version: '0.5.0',
     },
     protocols: [
       'activitypub',

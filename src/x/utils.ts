@@ -14,6 +14,15 @@ export function xExpandShortUrls(text: string, urls: Url[]): string {
   return result;
 }
 
+export function xRemoveShortUrls(text: string, urls: Url[]): string {
+  let result = text;
+  urls.forEach((url) => {
+    const [startIndex, endIndex] = url.indices;
+    result = result.substring(0, startIndex) + result.substring(endIndex);
+  });
+  return result;
+}
+
 export function textToHtml(text: string): string {
   text = text.replace(/\n/g, '<br>');
   text.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g)?.forEach((url) => {
@@ -24,6 +33,6 @@ export function textToHtml(text: string): string {
 }
 
 export async function fetchMIMEType(url: string): Promise<string> {
-  const response = await fetch(url);
+  const response = await fetch(url, { method: 'HEAD' });
   return response.headers.get('content-type') || '';
 }

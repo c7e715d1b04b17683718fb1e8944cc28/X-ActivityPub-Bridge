@@ -75,10 +75,10 @@ const TimelineProfileSchema = z.object({
               screen_name: z.string(),
             })),
             symbols: z.array(z.object({
-              display_url: z.string(),
-              expanded_url: z.string(),
-              indices: z.array(z.number()),
-              url: z.string(),
+              display_url: z.string().optional(),
+              expanded_url: z.string().optional(),
+              indices: z.array(z.number()).optional(),
+              url: z.string().optional(),
             })),
             media: z.array(
               z.object({
@@ -111,8 +111,7 @@ const TimelineProfileSchema = z.object({
             default_profile_image: z.boolean(),
             description: z.string(),
             entities: z.object({
-              description: z.object({ urls: z.array(z.unknown()) }),
-              url: z.object({
+              description: z.object({
                 urls: z.array(
                   z.object({
                     display_url: z.string(),
@@ -121,6 +120,16 @@ const TimelineProfileSchema = z.object({
                     indices: z.array(z.number()),
                   }),
                 ),
+              }),
+              url: z.object({
+                urls: z.array(
+                  z.object({
+                    display_url: z.string(),
+                    expanded_url: z.string(),
+                    url: z.string(),
+                    indices: z.array(z.number()),
+                  }),
+                ).optional(),
               }),
             }),
             fast_followers_count: z.number(),
@@ -173,7 +182,7 @@ const TweetResultSchema = z.object({
   in_reply_to_user_id_str: z.string().optional(),
   lang: z.string(),
   favorite_count: z.number(),
-  possibly_sensitive: z.boolean(),
+  possibly_sensitive: z.boolean().optional(),
   created_at: z.preprocess((value) => new Date(String(value)), z.date()),
   display_text_range: z.array(z.number()),
   entities: z.object({
@@ -191,10 +200,10 @@ const TweetResultSchema = z.object({
       screen_name: z.string(),
     })),
     symbols: z.array(z.object({
-      display_url: z.string(),
-      expanded_url: z.string(),
-      indices: z.array(z.number()),
-      url: z.string(),
+      display_url: z.string().optional(),
+      expanded_url: z.string().optional(),
+      indices: z.array(z.number()).optional(),
+      url: z.string().optional(),
     })),
     media: z.array(
       z.object({
@@ -215,7 +224,7 @@ const TweetResultSchema = z.object({
     verified: z.boolean(),
     verified_type: z.string().optional(),
     is_blue_verified: z.boolean(),
-    profile_image_shape: z.string(),
+    profile_image_shape: z.string().optional(),
   }),
   edit_control: z.object({
     edit_tweet_ids: z.array(z.string()),
@@ -295,6 +304,36 @@ const TweetResultSchema = z.object({
         type: z.literal('photo'),
         url: z.string(),
       }),
+      z.object({
+        display_url: z.string(),
+        expanded_url: z.string(),
+        ext_media_availability: z.object({ status: z.string() }),
+        indices: z.array(z.number()),
+        media_url_https: z.string(),
+        original_info: z.object({
+          height: z.number(),
+          width: z.number(),
+          focus_rects: z.array(z.unknown()),
+        }),
+        sizes: z.object({
+          large: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+          medium: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+          small: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+          thumb: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+        }),
+        type: z.literal('animated_gif'),
+        url: z.string(),
+        video_info: z.object({
+          aspect_ratio: z.array(z.number()),
+          variants: z.array(
+            z.object({
+              bitrate: z.number(),
+              content_type: z.string(),
+              url: z.string(),
+            }),
+          ),
+        }),
+      }),
     ]),
   ).optional(),
   photos: z.array(
@@ -336,7 +375,7 @@ const TweetResultSchema = z.object({
     in_reply_to_user_id_str: z.string().optional(),
     lang: z.string(),
     favorite_count: z.number(),
-    possibly_sensitive: z.boolean(),
+    possibly_sensitive: z.boolean().optional(),
     created_at: z.preprocess((value) => new Date(String(value)), z.date()),
     display_text_range: z.array(z.number()),
     entities: z.object({
@@ -354,10 +393,10 @@ const TweetResultSchema = z.object({
         screen_name: z.string(),
       })),
       symbols: z.array(z.object({
-        display_url: z.string(),
-        expanded_url: z.string(),
-        indices: z.array(z.number()),
-        url: z.string(),
+        display_url: z.string().optional(),
+        expanded_url: z.string().optional(),
+        indices: z.array(z.number()).optional(),
+        url: z.string().optional(),
       })),
       media: z.array(
         z.object({
@@ -378,7 +417,7 @@ const TweetResultSchema = z.object({
       verified: z.boolean(),
       verified_type: z.string().optional(),
       is_blue_verified: z.boolean(),
-      profile_image_shape: z.string(),
+      profile_image_shape: z.string().optional(),
     }),
     edit_control: z.object({
       edit_tweet_ids: z.array(z.string()),
@@ -482,6 +521,36 @@ const TweetResultSchema = z.object({
           type: z.literal('photo'),
           url: z.string(),
         }),
+        z.object({
+          display_url: z.string(),
+          expanded_url: z.string(),
+          ext_media_availability: z.object({ status: z.string() }),
+          indices: z.array(z.number()),
+          media_url_https: z.string(),
+          original_info: z.object({
+            height: z.number(),
+            width: z.number(),
+            focus_rects: z.array(z.unknown()),
+          }),
+          sizes: z.object({
+            large: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            medium: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            small: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            thumb: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+          }),
+          type: z.literal('animated_gif'),
+          url: z.string(),
+          video_info: z.object({
+            aspect_ratio: z.array(z.number()),
+            variants: z.array(
+              z.object({
+                bitrate: z.number(),
+                content_type: z.string(),
+                url: z.string(),
+              }),
+            ),
+          }),
+        }),
       ]),
     ).optional(),
     photos: z.array(
@@ -515,8 +584,6 @@ const TweetResultSchema = z.object({
       videoId: z.object({ type: z.string(), id: z.string() }),
       viewCount: z.number(),
     }).optional(),
-    conversation_count: z.number(),
-    news_action_type: z.string(),
     isEdited: z.boolean(),
     isStaleEdit: z.boolean(),
   }).optional(),
@@ -526,7 +593,7 @@ const TweetResultSchema = z.object({
     in_reply_to_user_id_str: z.string().optional(),
     lang: z.string(),
     favorite_count: z.number(),
-    possibly_sensitive: z.boolean(),
+    possibly_sensitive: z.boolean().optional(),
     created_at: z.preprocess((value) => new Date(String(value)), z.date()),
     display_text_range: z.array(z.number()),
     entities: z.object({
@@ -544,10 +611,10 @@ const TweetResultSchema = z.object({
         screen_name: z.string(),
       })),
       symbols: z.array(z.object({
-        display_url: z.string(),
-        expanded_url: z.string(),
-        indices: z.array(z.number()),
-        url: z.string(),
+        display_url: z.string().optional(),
+        expanded_url: z.string().optional(),
+        indices: z.array(z.number()).optional(),
+        url: z.string().optional(),
       })),
       media: z.array(
         z.object({
@@ -568,7 +635,7 @@ const TweetResultSchema = z.object({
       verified: z.boolean(),
       verified_type: z.string().optional(),
       is_blue_verified: z.boolean(),
-      profile_image_shape: z.string(),
+      profile_image_shape: z.string().optional(),
     }),
     edit_control: z.object({
       edit_tweet_ids: z.array(z.string()),
@@ -672,6 +739,36 @@ const TweetResultSchema = z.object({
           type: z.literal('photo'),
           url: z.string(),
         }),
+        z.object({
+          display_url: z.string(),
+          expanded_url: z.string(),
+          ext_media_availability: z.object({ status: z.string() }),
+          indices: z.array(z.number()),
+          media_url_https: z.string(),
+          original_info: z.object({
+            height: z.number(),
+            width: z.number(),
+            focus_rects: z.array(z.unknown()),
+          }),
+          sizes: z.object({
+            large: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            medium: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            small: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+            thumb: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
+          }),
+          type: z.literal('animated_gif'),
+          url: z.string(),
+          video_info: z.object({
+            aspect_ratio: z.array(z.number()),
+            variants: z.array(
+              z.object({
+                bitrate: z.number(),
+                content_type: z.string(),
+                url: z.string(),
+              }),
+            ),
+          }),
+        }),
       ]),
     ).optional(),
     photos: z.array(
@@ -705,8 +802,6 @@ const TweetResultSchema = z.object({
       videoId: z.object({ type: z.string(), id: z.string() }),
       viewCount: z.number(),
     }).optional(),
-    conversation_count: z.number(),
-    news_action_type: z.string(),
     isEdited: z.boolean(),
     isStaleEdit: z.boolean(),
   }).optional(),
@@ -726,9 +821,26 @@ export default class SyndicationTwitter {
       },
     });
   }
-  async timelineProfile(screenName: string) {
+  async timelineProfileByScreenName(screenName: string) {
     const response = await this.client.get(
       `https://syndication.twitter.com/srv/timeline-profile/screen-name/${screenName}`,
+    );
+    const nextData = await response.text()
+      .then((text) =>
+        JSON.parse(
+          text.split('<script id="__NEXT_DATA__" type="application/json">')[1]
+            .split('</script>')[0],
+        )
+      )
+      .then((data) => NextDataSchema.parseAsync(data));
+    const timelineProfile = await TimelineProfileSchema.parseAsync(
+      nextData.props.pageProps,
+    );
+    return timelineProfile;
+  }
+  async timelineProfileByUserId(userId: bigint) {
+    const response = await this.client.get(
+      `https://syndication.twitter.com/srv/timeline-profile/user-id/${userId}`,
     );
     const nextData = await response.text()
       .then((text) =>
