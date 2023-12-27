@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@/": "./src/"
+  },
+  "tasks": {
+    "dev": "deno run --watch --allow-all ./src/server.ts",
+    "start": "deno run --allow-net --allow-read --allow-env ./src/server.ts"
+  }
+}
