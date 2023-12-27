@@ -6,9 +6,10 @@ import {
 
 const app = new Hono();
 
-app.route('/.well-known', await import('./routers/.well-known.ts').then((r) => r.default));
-app.route('/nodeinfo', await import('./routers/nodeinfo.ts').then((r) => r.default));
-app.route('/users', await import('./routers/users.ts').then((r) => r.default));
+app.route('/.well-known', await import('@/routers/.well-known.ts').then((r) => r.default));
+app.route('/nodeinfo', await import('@/routers/nodeinfo.ts').then((r) => r.default));
+app.route('/users', await import('@/routers/users.ts').then((r) => r.default));
+app.route('/users/:username/collections', await import('@/routers/users/[username]/collections.ts').then((r) => r.default));
 
 app.get('/', (c: Context) => c.text('X (Twitter) ActivityPub Bridge'));
 

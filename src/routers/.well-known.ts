@@ -2,7 +2,7 @@ import {
   Hono,
   type Context,
 } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
-import SyndicationTwitter from '../internal/syndication_twitter.ts';
+import SyndicationTwitter from '@/x/syndication_twitter.ts';
 
 const app = new Hono();
 

@@ -18,3 +18,8 @@ export function textToHtml(text: string): string {
   });
   return `<p>${text}</p>`;
 }
+
+export async function fetchMIMEType(url: string): Promise<string> {
+  const response = await fetch(url);
+  return response.headers.get('content-type') || '';
+}

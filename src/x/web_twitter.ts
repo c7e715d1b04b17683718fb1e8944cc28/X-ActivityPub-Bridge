@@ -57,7 +57,7 @@ const UserResponseSchema = z.object({
           media_count: z.number(),
           name: z.string(),
           normal_followers_count: z.number(),
-          pinned_tweet_ids_str: z.array(z.unknown()),
+          pinned_tweet_ids_str: z.array(z.string()),
           possibly_sensitive: z.boolean(),
           profile_banner_url: z.string().optional(),
           profile_image_url_https: z.string(),
