@@ -1,5 +1,5 @@
-import ky, { type KyInstance } from "npm:ky@1.1.3";
-import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import ky, { type KyInstance } from 'npm:ky@1.1.3';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const NextDataSchema = z.object({
   props: z.object({
@@ -247,7 +247,7 @@ const TweetResultSchema = z.object({
           small: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
           thumb: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
         }),
-        type: z.literal("video"),
+        type: z.literal('video'),
         url: z.string(),
         video_info: z.object({
           aspect_ratio: z.array(z.number()),
@@ -292,7 +292,7 @@ const TweetResultSchema = z.object({
           small: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
           thumb: z.object({ h: z.number(), resize: z.string(), w: z.number() }),
         }),
-        type: z.literal("photo"),
+        type: z.literal('photo'),
         url: z.string(),
       }),
     ]),
@@ -422,7 +422,7 @@ const TweetResultSchema = z.object({
               w: z.number(),
             }),
           }),
-          type: z.literal("video"),
+          type: z.literal('video'),
           url: z.string(),
           video_info: z.object({
             aspect_ratio: z.array(z.number()),
@@ -479,7 +479,7 @@ const TweetResultSchema = z.object({
               w: z.number(),
             }),
           }),
-          type: z.literal("photo"),
+          type: z.literal('photo'),
           url: z.string(),
         }),
       ]),
@@ -612,7 +612,7 @@ const TweetResultSchema = z.object({
               w: z.number(),
             }),
           }),
-          type: z.literal("video"),
+          type: z.literal('video'),
           url: z.string(),
           video_info: z.object({
             aspect_ratio: z.array(z.number()),
@@ -669,7 +669,7 @@ const TweetResultSchema = z.object({
               w: z.number(),
             }),
           }),
-          type: z.literal("photo"),
+          type: z.literal('photo'),
           url: z.string(),
         }),
       ]),
@@ -718,12 +718,11 @@ export type TweetResult = z.infer<typeof TweetResultSchema>;
 
 export default class SyndicationTwitter {
   private readonly client: KyInstance;
-  constructor(authToken: string = "") {
+  constructor(authToken: string = '') {
     this.client = ky.create({
       headers: {
-        "Cookie": authToken,
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        'Cookie': authToken,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
     });
   }
@@ -735,7 +734,7 @@ export default class SyndicationTwitter {
       .then((text) =>
         JSON.parse(
           text.split('<script id="__NEXT_DATA__" type="application/json">')[1]
-            .split("</script>")[0],
+            .split('</script>')[0],
         )
       )
       .then((data) => NextDataSchema.parseAsync(data));
@@ -746,13 +745,13 @@ export default class SyndicationTwitter {
   }
   async tweetResult(postId: bigint) {
     const response = await this.client.get(
-      "https://cdn.syndication.twimg.com/tweet-result",
+      'https://cdn.syndication.twimg.com/tweet-result',
       {
         searchParams: new URLSearchParams({
           id: postId.toString(),
           token: ((Number(postId) / 1e15) * Math.PI).toString(36).replace(
             /(0+|\.)/g,
-            "",
+            '',
           ),
         }),
       },

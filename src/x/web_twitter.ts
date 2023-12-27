@@ -69,7 +69,7 @@ const UserResponseSchema = z.object({
           verified: z.boolean(),
           verified_type: z.string().optional(),
           want_retweets: z.boolean().optional(),
-          withheld_in_countries: z.array(z.unknown())
+          withheld_in_countries: z.array(z.unknown()),
         }),
         professional: z.object({
           rest_id: z.string(),
@@ -127,9 +127,9 @@ const UserResponseSchema = z.object({
                   z.object({
                     from_index: z.number(),
                     to_index: z.number(),
-                    ref: z.object({ url: z.string(), url_type: z.string() })
-                  })
-                )
+                    ref: z.object({ url: z.string(), url_type: z.string() }),
+                  }),
+                ),
               }),
               verified_since_msec: z.string(),
             }),
@@ -140,16 +140,16 @@ const UserResponseSchema = z.object({
         ]),
         highlights_info: z.object({
           can_highlight_tweets: z.boolean(),
-          highlighted_tweets: z.string()
+          highlighted_tweets: z.string(),
         }),
         business_account: z.union([
           z.object({}),
           z.object({ affiliates_count: z.number() }),
         ]),
-        creator_subscriptions_count: z.number()
-      })
-    })
-  })
+        creator_subscriptions_count: z.number(),
+      }),
+    }),
+  }),
 });
 
 export type User = z.infer<typeof UserResponseSchema>['data']['user']['result'];
@@ -169,7 +169,7 @@ export default class Twitter {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'X-Csrf-Token': ct0,
         },
-      })
+      });
     } else {
       this.client = ky.create({
         prefixUrl: 'https://api.twitter.com',
@@ -185,9 +185,9 @@ export default class Twitter {
                   headers: {
                     'Authorization': AUTHORIZATION,
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                  }
+                  },
                 }).json<{ guest_token: string }>()
-                .then(({ guest_token }) => guest_token);
+                  .then(({ guest_token }) => guest_token);
                 this.client.extend({ headers: { 'X-Guest-Token': guestToken } });
                 request.headers.set('X-Guest-Token', guestToken);
               }
@@ -201,31 +201,43 @@ export default class Twitter {
                   headers: {
                     'Authorization': AUTHORIZATION,
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                  }
+                  },
                 }).json<{ guest_token: string }>()
-                .then(({ guest_token }) => guest_token);
+                  .then(({ guest_token }) => guest_token);
                 this.client.extend({ headers: { 'X-Guest-Token': guestToken } });
                 request.headers.set('X-Guest-Token', guestToken);
                 response = await this.client(request);
               }
               return response;
-            }
-          ]
-        }
-      })
+            },
+          ],
+        },
+      });
     }
   }
   async getUserByScreenName(screenName: string) {
     const response = await this.client.get('graphql/NimuplG1OB7Fd2btCLdBOw/UserByScreenName', {
       searchParams: new URLSearchParams({
         variables: JSON.stringify({ screen_name: screenName, withSafetyModeUserFields: true }),
-        features: JSON.stringify({ hidden_profile_likes_enabled: true, hidden_profile_subscriptions_enabled: true, responsive_web_graphql_exclude_directive_enabled: true, verified_phone_label_enabled: false, subscriptions_verification_info_is_identity_verified_enabled: true, subscriptions_verification_info_verified_since_enabled: true, highlights_tweets_tab_ui_enabled: true, responsive_web_twitter_article_notes_tab_enabled: false, creator_subscriptions_tweet_preview_api_enabled: true, responsive_web_graphql_skip_user_profile_image_extensions_enabled: false, responsive_web_graphql_timeline_navigation_enabled: true }),
-        fieldToggles: JSON.stringify({ withAuxiliaryUserLabels: false })
-      })
+        features: JSON.stringify({
+          hidden_profile_likes_enabled: true,
+          hidden_profile_subscriptions_enabled: true,
+          responsive_web_graphql_exclude_directive_enabled: true,
+          verified_phone_label_enabled: false,
+          subscriptions_verification_info_is_identity_verified_enabled: true,
+          subscriptions_verification_info_verified_since_enabled: true,
+          highlights_tweets_tab_ui_enabled: true,
+          responsive_web_twitter_article_notes_tab_enabled: false,
+          creator_subscriptions_tweet_preview_api_enabled: true,
+          responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+          responsive_web_graphql_timeline_navigation_enabled: true,
+        }),
+        fieldToggles: JSON.stringify({ withAuxiliaryUserLabels: false }),
+      }),
     });
     const user = await response.json()
-    .then((json) => UserResponseSchema.parseAsync(json))
-    .then(({ data: { user: { result } } }) => result);
+      .then((json) => UserResponseSchema.parseAsync(json))
+      .then(({ data: { user: { result } } }) => result);
     return user;
   }
 }

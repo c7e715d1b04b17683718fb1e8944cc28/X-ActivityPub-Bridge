@@ -1,8 +1,8 @@
-export function xExpandUrl(url: string, urls: { display_url: string, expanded_url: string, url: string, indices: number[] }[]): string {
+export function xExpandUrl(url: string, urls: { display_url: string; expanded_url: string; url: string; indices: number[] }[]): string {
   return urls.find((u) => u.url === url)?.expanded_url || url;
 }
 
-export function xExpandDescription(description: string, urls: { display_url: string, expanded_url: string, url: string, indices: number[] }[]): string {
+export function xExpandDescription(description: string, urls: { display_url: string; expanded_url: string; url: string; indices: number[] }[]): string {
   // TODO: indicesはどこからどこまでが短縮されたURLかを指す値なので、urlが同じ場合に置き換えるのではなくindicesを使うべき
   urls.forEach((url) => {
     description = description.replace(url.url, url.expanded_url);

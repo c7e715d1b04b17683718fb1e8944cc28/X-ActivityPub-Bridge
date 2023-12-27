@@ -1,26 +1,29 @@
-import {
-  Hono,
-  type Context,
-} from 'https://deno.land/x/hono@v3.11.7/mod.ts';
+import { type Context, Hono } from 'https://deno.land/x/hono@v3.11.7/mod.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 
 const app = new Hono();
 
 const syndicationTwitter = new SyndicationTwitter(Deno.env.get('X_AUTH_TOKEN'));
 
-app.get('/nodeinfo', (c: Context) => c.json({
-  links: [
-    {
-      rel: 'http://nodeinfo.diaspora.software/ns/schema/2.1',
-      href: `${new URL(c.req.url).origin}/nodeinfo/2.1`,
-    }
-  ]
-}));
+app.get('/nodeinfo', (c: Context) =>
+  c.json({
+    links: [
+      {
+        rel: 'http://nodeinfo.diaspora.software/ns/schema/2.1',
+        href: `${new URL(c.req.url).origin}/nodeinfo/2.1`,
+      },
+    ],
+  }));
 
-app.get('/host-meta', (c: Context) => c.text(`<?xml version="1.0" encoding="UTF-8"?>
+app.get('/host-meta', (c: Context) =>
+  c.text(
+    `<?xml version="1.0" encoding="UTF-8"?>
 <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
   <Link rel="lrdd" template="${new URL(c.req.url).origin}/.well-known/webfinger?resource={uri}"/>
-</XRD>`, 200, { 'content-type': 'application/rdf+xml' }));
+</XRD>`,
+    200,
+    { 'content-type': 'application/rdf+xml' },
+  ));
 
 app.get('/webfinger', async (c: Context) => {
   const resource = c.req.query('resource');
@@ -50,14 +53,14 @@ app.get('/webfinger', async (c: Context) => {
         type: 'text/html',
         href: `https://x.com/intent/user?${new URLSearchParams({
           screen_name: username,
-        })}`
+        })}`,
       },
       {
         rel: 'self',
         type: 'application/activity+json',
-        href: `${new URL(c.req.url).origin}/users/${username}`
-      }
-    ]
+        href: `${new URL(c.req.url).origin}/users/${username}`,
+      },
+    ],
   });
 });
 

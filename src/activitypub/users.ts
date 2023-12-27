@@ -1,11 +1,5 @@
-import {
-  xExpandUrl,
-  xExpandDescription,
-  textToHtml,
-} from '@/x/utils.ts'; 
-import type {
-  User,
-} from '@/x/web_twitter.ts';
+import { textToHtml, xExpandDescription, xExpandUrl } from '@/x/utils.ts';
+import type { User } from '@/x/web_twitter.ts';
 
 export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
   const attachment = [];
@@ -54,7 +48,8 @@ export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
   attachment.push({
     type: 'PropertyValue',
     name: 'X ActivityPub Bridge',
-    value: '<a href="https://github.com/c7e715d1b04b17683718fb1e8944cc28/XActivityPubBridge">github.com/c7e715d1b04b17683718fb1e8944cc28/XActivityPubBridge</a>',
+    value:
+      '<a href="https://github.com/c7e715d1b04b17683718fb1e8944cc28/XActivityPubBridge">github.com/c7e715d1b04b17683718fb1e8944cc28/XActivityPubBridge</a>',
   });
   attachment.push({
     type: 'PropertyValue',
@@ -112,13 +107,17 @@ export function xUserToActivityPubPerson(user: User, reqUrl: URL) {
       type: 'Image',
       url: user.legacy.profile_image_url_https.replace('_normal.', '.'),
     },
-    image: user.legacy.profile_banner_url ? {
-      type: 'Image',
-      url: user.legacy.profile_banner_url,
-    } : undefined,
-    location: user.legacy.location ? {
-      type: 'Place',
-      name: user.legacy.location,
-    } : undefined,
-  }
+    image: user.legacy.profile_banner_url
+      ? {
+        type: 'Image',
+        url: user.legacy.profile_banner_url,
+      }
+      : undefined,
+    location: user.legacy.location
+      ? {
+        type: 'Place',
+        name: user.legacy.location,
+      }
+      : undefined,
+  };
 }
