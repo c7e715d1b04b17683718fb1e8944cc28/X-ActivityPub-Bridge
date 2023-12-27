@@ -1,5 +1,5 @@
 import { Hono } from 'npm:hono@3.11.11';
-import { usersCache, timelineProfilesCache } from '@/lib/cache.ts';
+import { screenName2UserIdCache, timelineProfilesCache, usersCache } from '@/lib/cache.ts';
 import SyndicationTwitter from '@/x/syndication_twitter.ts';
 import Twitter from '@/x/web_twitter.ts';
 
@@ -44,23 +44,36 @@ app.get('/webfinger', async (c) => {
   if (hostname !== new URL(c.req.url).hostname) {
     return c.text('404 Not Found', 404);
   }
-  const timelineProfile = await syndicationTwitter.timelineProfileByScreenName(username);
-  if (!timelineProfile.contextProvider.hasResults || !timelineProfile.headerProps) {
-    return c.text('404 Not Found', 404);
-  }
   let userId: bigint | undefined = undefined;
-  for (const entry of timelineProfile.timeline.entries) {
-    if (entry.content.tweet.user.screen_name === timelineProfile.headerProps.screenName) {
-      userId = BigInt(entry.content.tweet.user.id_str);
-      break;
+  const userIdCache = screenName2UserIdCache.get(username);
+  if (userIdCache) {
+    const timelineProfile = await syndicationTwitter.timelineProfileByUserId(userIdCache);
+    if (!timelineProfile.contextProvider.hasResults || !timelineProfile.headerProps) {
+      return c.text('404 Not Found', 404);
+    }
+    if (timelineProfile.headerProps.screenName === username) {
+      userId = userIdCache;
     }
   }
   if (!userId) {
-    const user = await twitter.getUserByScreenName(timelineProfile.headerProps.screenName);
-    userId = BigInt(user.rest_id);
-    usersCache.set(userId, user);
+    const timelineProfile = await syndicationTwitter.timelineProfileByScreenName(username);
+    if (!timelineProfile.contextProvider.hasResults || !timelineProfile.headerProps) {
+      return c.text('404 Not Found', 404);
+    }
+    for (const entry of timelineProfile.timeline.entries) {
+      if (entry.content.tweet.user.screen_name === timelineProfile.headerProps.screenName) {
+        userId = BigInt(entry.content.tweet.user.id_str);
+        break;
+      }
+    }
+    if (!userId) {
+      const user = await twitter.getUserByScreenName(timelineProfile.headerProps.screenName);
+      userId = BigInt(user.rest_id);
+      usersCache.set(userId, user);
+    }
+    timelineProfilesCache.set(userId, timelineProfile);
+    screenName2UserIdCache.set(timelineProfile.headerProps.screenName, userId);
   }
-  timelineProfilesCache.set(userId, timelineProfile);
   return c.json({
     subject: `${prefix}:${username}@${hostname}`,
     links: [
